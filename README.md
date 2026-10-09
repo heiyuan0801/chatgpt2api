@@ -193,6 +193,57 @@ curl http://localhost:3000/v1/images/generations \
 
 </details>
 
+### 图片 AI 超分与 4K 返回
+
+图片生成和图片编辑默认返回上游原图。需要 AI 超分时，在请求中显式设置
+`upscale=true`，并通过 `upscale_target` 选择 `2k` 或 `4k`：
+
+```bash
+curl http://localhost:3000/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <auth-key>" \
+  -d '{
+    "model":"gpt-image-2",
+    "prompt":"一只漂浮在太空里的猫，电影感光影",
+    "n":1,
+    "size":"1536x1024",
+    "response_format":"url",
+    "upscale":true,
+    "upscale_target":"4k"
+  }'
+```
+
+`upscale_target` 支持以下值：
+
+| 值 | 目标尺寸规则 |
+| :--- | :--- |
+| 未设置或 `upscale=false` | 保留原图尺寸，兼容旧客户端 |
+| `2k` | 最长边约 2048 像素 |
+| `4k` | 最长边约 3840 像素 |
+
+超分始终保持原图宽高比例，不会强制拉伸到固定的 16:9。例如 `1536×1024`
+会生成约 `3840×2560` 的 4K 图片，竖图和方图同样按最长边计算。请求也兼容
+直接传入 `"size":"2k"` 或 `"size":"4k"` 的写法。
+
+当 `response_format` 为 `url` 时，响应 `data[].url` 优先指向超分后的图片，
+并同时返回最终图片的 `width` 和 `height`；当 `response_format` 为 `b64_json`
+时，`data[].b64_json` 是超分后的图片数据。原图会由现有图片存储保留，不会被
+超分结果覆盖。
+
+超分是生成完成后的本地交付阶段，默认使用 Final2x-core 的
+`realesr-general-x4v3` 轻量模型，适合没有 GPU 的 Docker 环境。可通过以下
+环境变量调整模型、设备和超时时间：
+
+```env
+CHATGPT2API_FINAL2X_MODEL=realesr-general-x4v3.pth
+CHATGPT2API_FINAL2X_DEVICE=cpu
+CHATGPT2API_FINAL2X_TIMEOUT_SECONDS=600
+```
+
+Studio 中对应的选项为“原图 / 2K 高清 / 4K 高清”。超分失败时返回
+`image_upscale_failed`（HTTP 502），不会切换上游账号或重新生成；原图仍会
+保留，便于后续处理。
+
 实际可用模型以上游账号和 `/v1/models` 返回值为准。
 
 ## 关键配置
