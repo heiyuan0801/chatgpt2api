@@ -23,6 +23,8 @@ _STAGE_LABELS = {
     "generating": "上游生成中",
     "image_stream_resolve_start": "等待图片结果",
     "receiving_image": "接收图片",
+    "image_upscale": "AI 超分中",
+    "image_upscale_done": "保存超分图片",
 }
 
 _TERMINAL_STAGE_LABELS = {
@@ -167,6 +169,8 @@ def image_task_row(
         "model": _text(raw.get("model"), "gpt-image-2"),
         "size": _text(raw.get("size")),
         "quality": _text(raw.get("quality"), "auto"),
+        "upscale": bool(raw.get("upscale")),
+        "upscale_target": _text(raw.get("upscale_target")),
         "stage_code": stage_code,
         "stage_label": stage_label,
         "created_at": _text(raw.get("created_at")),

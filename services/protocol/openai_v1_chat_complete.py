@@ -248,6 +248,10 @@ def image_result_content(result: dict[str, Any]) -> str:
 
 def image_chat_response(body: dict[str, Any]) -> dict[str, Any]:
     model, prompt, n, images, base_url = chat_image_args(body)
+    upscale_target = body.get("upscale_target")
+    size = body.get("size")
+    if not upscale_target and str(size or "").strip().lower() in {"2k", "4k"}:
+        upscale_target = str(size).strip().lower()
     result = collect_image_outputs(stream_image_outputs_with_pool(ConversationRequest(
         prompt=prompt,
         model=model,
@@ -255,6 +259,8 @@ def image_chat_response(body: dict[str, Any]) -> dict[str, Any]:
         response_format="b64_json",
         images=encode_images(images) or None,
         base_url=base_url,
+        upscale=bool(body.get("upscale")) or bool(upscale_target),
+        upscale_target=str(upscale_target or "") or None,
         message_as_error=True,
         call_id=str(body.get("_call_id") or ""),
         trace_image_perf=bool(body.get("_trace_image_perf")),
@@ -279,6 +285,10 @@ def image_chat_response(body: dict[str, Any]) -> dict[str, Any]:
 
 def image_chat_events(body: dict[str, Any]) -> Iterator[dict[str, Any]]:
     model, prompt, n, images, base_url = chat_image_args(body)
+    upscale_target = body.get("upscale_target")
+    size = body.get("size")
+    if not upscale_target and str(size or "").strip().lower() in {"2k", "4k"}:
+        upscale_target = str(size).strip().lower()
     image_outputs = stream_image_outputs_with_pool(ConversationRequest(
         prompt=prompt,
         model=model,
@@ -286,6 +296,8 @@ def image_chat_events(body: dict[str, Any]) -> Iterator[dict[str, Any]]:
         response_format="b64_json",
         images=encode_images(images) or None,
         base_url=base_url,
+        upscale=bool(body.get("upscale")) or bool(upscale_target),
+        upscale_target=str(upscale_target or "") or None,
         message_as_error=True,
         call_id=str(body.get("_call_id") or ""),
         trace_image_perf=bool(body.get("_trace_image_perf")),

@@ -22,6 +22,7 @@ export function useStudioModelFormRuntime() {
     size: DEFAULT_IMAGE_SIZE,
     quality: DEFAULT_IMAGE_QUALITY,
     n: 1,
+    upscaleTarget: 'original',
   })
 
   const chatModelOptions = computed(() => (

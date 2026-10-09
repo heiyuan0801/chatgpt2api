@@ -15,6 +15,7 @@ requirements.
 | [`colbymchenry/codegraph`](https://github.com/colbymchenry/codegraph) | Symbol lookup, caller/callee discovery, route indexing, and change-impact exploration | That a generated edge establishes domain ownership or that every dynamic dependency was found |
 | [`DietrichGebert/ponytail`](https://github.com/DietrichGebert/ponytail) | A minimum-solution ladder and focused over-engineering review prompts | That its benchmark savings apply locally, or that shorter code permits removing validation, safety, accessibility, ownership, or lifecycle boundaries |
 | [`yukkcat/nanocat-ui`](https://github.com/yukkcat/nanocat-ui) | Generic Vue controls, overlays, tokens, focus behavior, and interaction primitives consumed as an npm dependency | That product pages, domain workflows, charts, or responsive composition belong in the UI package |
+| [`EutropicAI/Final2x`](https://github.com/EutropicAI/Final2x) | Final2x-core CLI configuration and RealESRGAN model execution used by the image delivery stage | That its Electron GUI, model cache, or desktop paths apply to the Linux service runtime |
 
 ## Reference workflow
 

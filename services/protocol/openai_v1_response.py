@@ -476,11 +476,16 @@ def response_events(body: dict[str, Any]) -> Iterator[dict[str, Any]]:
         images = None
     input_image_tokens = count_image_content_tokens(_input_image_parts(body.get("input")), model)
     tool = response_image_tool(body)
+    upscale_target = body.get("upscale_target")
+    if not upscale_target and str(tool.get("size") or "").strip().lower() in {"2k", "4k"}:
+        upscale_target = str(tool.get("size")).strip().lower()
     image_outputs = stream_image_outputs_with_pool(ConversationRequest(
         prompt=prompt,
         model=model,
         size=tool.get("size"),
         quality=str(tool.get("quality") or "auto"),
+        upscale=bool(body.get("upscale")) or bool(upscale_target),
+        upscale_target=str(upscale_target or "") or None,
         response_format="b64_json",
         images=images,
         message_as_error=True,

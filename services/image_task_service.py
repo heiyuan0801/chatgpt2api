@@ -384,6 +384,8 @@ class ImageTaskService:
         n: int = 1,
         size: str | None = None,
         quality: str = "auto",
+        upscale: bool = False,
+        upscale_target: str | None = None,
         base_url: str = "",
     ) -> dict[str, Any]:
         payload = {
@@ -392,6 +394,8 @@ class ImageTaskService:
             "n": _image_count(n),
             "size": size,
             "quality": quality,
+            "upscale": bool(upscale) or bool(upscale_target),
+            "upscale_target": _clean(upscale_target),
             "response_format": "url",
             "base_url": base_url,
         }
@@ -407,6 +411,8 @@ class ImageTaskService:
         n: int = 1,
         size: str | None = None,
         quality: str = "auto",
+        upscale: bool = False,
+        upscale_target: str | None = None,
         base_url: str = "",
         images: list[tuple[bytes, str, str]] | None = None,
         masks: list[tuple[bytes, str, str]] | None = None,
@@ -420,6 +426,8 @@ class ImageTaskService:
             "n": _image_count(n),
             "size": size,
             "quality": quality,
+            "upscale": bool(upscale) or bool(upscale_target),
+            "upscale_target": _clean(upscale_target),
             "response_format": "url",
             "base_url": base_url,
         }
@@ -508,6 +516,8 @@ class ImageTaskService:
                 "n": _image_count(payload.get("n")),
                 "size": _clean(payload.get("size")),
                 "quality": _clean(payload.get("quality"), "auto"),
+                "upscale": bool(payload.get("upscale")),
+                "upscale_target": _clean(payload.get("upscale_target")),
                 "base_url": _clean(payload.get("base_url")),
                 "created_at": now,
                 "updated_at": now,
@@ -955,6 +965,8 @@ class ImageTaskService:
                 "n": _image_count(item.get("n")),
                 "size": _clean(item.get("size")),
                 "quality": _clean(item.get("quality"), "auto"),
+                "upscale": bool(item.get("upscale")),
+                "upscale_target": _clean(item.get("upscale_target")),
                 "base_url": _clean(item.get("base_url")),
                 "created_at": _clean(item.get("created_at"), _now_iso()),
                 "updated_at": _clean(item.get("updated_at"), _clean(item.get("created_at"), _now_iso())),
@@ -1136,6 +1148,8 @@ class ImageTaskService:
                 task = self._tasks.get(key)
                 quality = _clean(task.get("quality"), "auto") if task else "auto"
                 size = _clean(task.get("size")) if task else None
+                upscale = bool(task.get("upscale")) if task else False
+                upscale_target = _clean(task.get("upscale_target")) if task else ""
             formatted = format_image_result(
                 image_items,
                 "",  # prompt 已不重要，结果已经拿到了
@@ -1143,6 +1157,8 @@ class ImageTaskService:
                 base_url,
                 int(time.time()),
                 requested_size=size,
+                upscale=upscale,
+                upscale_target=upscale_target or None,
             )
             data = formatted["data"]
             self._update_task(

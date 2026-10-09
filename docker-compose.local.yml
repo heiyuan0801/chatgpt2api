@@ -12,6 +12,9 @@ services:
       - ./config.json:/app/config.json
     environment:
       DATABASE_URL: sqlite:////app/data/chatgpt2api.db
+      CHATGPT2API_FINAL2X_MODEL: ${CHATGPT2API_FINAL2X_MODEL:-realesr-general-x4v3.pth}
+      CHATGPT2API_FINAL2X_DEVICE: ${CHATGPT2API_FINAL2X_DEVICE:-cpu}
+      CHATGPT2API_FINAL2X_TIMEOUT_SECONDS: ${CHATGPT2API_FINAL2X_TIMEOUT_SECONDS:-900}
     # 应用数据库；删除 DATABASE_URL 时同样默认使用 /app/data/chatgpt2api.db
     #   DATABASE_URL: postgresql://user:password@host:5432/dbname
 

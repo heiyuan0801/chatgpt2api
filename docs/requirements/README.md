@@ -29,7 +29,8 @@ requirements may move to `archive/` after links and this index are updated.
 
 ## Active requirements
 
-No active PRDs are currently tracked.
+* [`0001-image-final2x-upscale.md`](0001-image-final2x-upscale.md) — AI
+  upscaling for generated and edited images (pending-verification)
 
 PRDs are planning evidence, never proof that the product already behaves as
 described.

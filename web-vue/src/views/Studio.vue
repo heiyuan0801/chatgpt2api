@@ -115,6 +115,7 @@
             @update:image-size="imageForm.size = $event"
             @update:image-quality="imageForm.quality = $event"
             @update:image-count="imageForm.n = $event"
+            @update:image-upscale="updateImageUpscale"
             @submit="sendMessage"
             @stop="stopStreaming"
             @cancel-edit="cancelMessageEdit"
@@ -320,6 +321,10 @@ const chatModel = modelFormRuntime.chatModel
 const chatReasoningEffort = modelFormRuntime.chatReasoningEffort
 const imageForm = modelFormRuntime.imageForm
 const imageHighResolutionEnabled = modelFormRuntime.imageHighResolutionEnabled
+
+function updateImageUpscale(target: 'original' | '2k' | '4k') {
+  imageForm.upscaleTarget = target
+}
 
 const conversations = ref<StudioConversation[]>(persistedConversationState.conversations)
 const activeConversationId = ref(persistedConversationState.activeConversationId)

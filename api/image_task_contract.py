@@ -43,6 +43,8 @@ class ImageTaskRow(BaseModel):
     model: str
     size: str
     quality: str
+    upscale: bool = False
+    upscale_target: str = ""
     stage_code: str
     stage_label: str
     created_at: str

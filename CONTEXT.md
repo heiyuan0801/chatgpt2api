@@ -52,6 +52,12 @@ _Avoid_: Chat response, generic failure
 A generated or edited image exposed by URL or base64 data and optionally indexed by the gallery.
 _Avoid_: Image task
 
+**AI Upscale Delivery**:
+The optional delivery stage after an upstream image is fetched. It preserves
+the source aspect ratio, stores the original Image Asset, and returns a
+separate transformed Image Asset at the requested 2K or 4K longest edge.
+_Avoid_: Re-generating the image, replacing the original asset
+
 **Editable File Task**:
 An owner-scoped asynchronous PPT or PSD generation request whose terminal result exposes a primary editable file and a ZIP archive.
 _Avoid_: Image task, chat attachment

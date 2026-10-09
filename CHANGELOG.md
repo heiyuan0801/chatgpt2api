@@ -2,6 +2,8 @@
 
 ## Unreleased
 
++ [新增] 图片生成和 Studio 图片任务支持显式 `upscale=true` 与 `upscale_target=2k|4k`，使用 Final2x-core/RealESRGAN 进行 AI 超分，保留原图并按原始比例返回最长边 2048 或 3840 的最终图片。
+
 ## 3.2.3 - 2026-09-09
 
 + [新增] Python 图片接口和共享模型列表支持 `gpt-image-2.5`、`gpt-image-2.5-flare`、`gpt-image-2.5-sunburst`，通过 ChatGPT Web 的 `auto` 路由兼容，不包含 `exact` 别名。

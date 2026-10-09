@@ -39,6 +39,8 @@ class ImageFailure:
 
     @property
     def switch_account(self) -> bool:
+        if self.code == "image_upscale_failed":
+            return False
         return self.outcome == "failure"
 
     @property
@@ -135,6 +137,9 @@ FAILURE_POLICIES: dict[str, FailurePolicy] = {
         "request", None, False, 400, "invalid_request_error",
     ),
     "image_download_failed": FailurePolicy(
+        "delivery", None, False, 502, "server_error",
+    ),
+    "image_upscale_failed": FailurePolicy(
         "delivery", None, False, 502, "server_error",
     ),
     "task_interrupted": FailurePolicy(
@@ -260,6 +265,7 @@ _TOOL_ERROR_PUBLIC_CODES = frozenset({
     "image_tool_error",
     "image_stream_interrupted",
     "image_stream_timeout",
+    "image_upscale_failed",
 })
 
 def _is_structured_text_payload(text: str) -> bool:
@@ -473,7 +479,7 @@ def _failure_priority(code: str) -> int:
         return 7
     if normalized in {"file_upload_throttled", "upstream_rate_limited"}:
         return 6
-    if normalized == "image_download_failed":
+    if normalized in {"image_download_failed", "image_upscale_failed"}:
         return 5
     if normalized in TEXT_REVIEW_FAILURE_CODES and normalized != "upstream_text_reply":
         return 4

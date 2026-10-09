@@ -24,6 +24,8 @@ export interface ImageTask {
   model: string
   size: string
   quality: string
+  upscale: boolean
+  upscale_target: string
   stage_code: string
   stage_label: string
   created_at: string
@@ -51,6 +53,8 @@ export interface CreateGenerationTaskInput {
   n?: number
   size?: string
   quality?: string
+  upscale?: boolean
+  upscaleTarget?: string
   clientTaskId?: string
 }
 
@@ -294,6 +298,8 @@ function parseImageTask(value: unknown, path = 'response'): ImageTask {
     model: expectString(raw.model, `${path}.model`),
     size: expectString(raw.size, `${path}.size`),
     quality: expectString(raw.quality, `${path}.quality`),
+    upscale: expectBoolean(raw.upscale, `${path}.upscale`),
+    upscale_target: expectString(raw.upscale_target, `${path}.upscale_target`),
     stage_code: expectString(raw.stage_code, `${path}.stage_code`),
     stage_label: expectString(raw.stage_label, `${path}.stage_label`),
     created_at: expectString(raw.created_at, `${path}.created_at`),
@@ -341,6 +347,8 @@ function createEditForm(input: CreateEditTaskInput) {
   form.append('quality', input.quality || DEFAULT_IMAGE_QUALITY)
   const size = requestSize(input.size)
   if (size) form.append('size', size)
+  if (input.upscale) form.append('upscale', 'true')
+  if (input.upscaleTarget) form.append('upscale_target', input.upscaleTarget)
 
   const imageUrls = normalizeUrlList(input.imageUrls)
   if (imageUrls.length === 1) {
@@ -380,6 +388,8 @@ export const imageTasksApi = {
       n: normalizeImageCount(input.n),
       size: requestSize(input.size),
       quality: input.quality || DEFAULT_IMAGE_QUALITY,
+      upscale: input.upscale,
+      upscale_target: input.upscaleTarget,
     })
     return parseImageTask(response)
   },

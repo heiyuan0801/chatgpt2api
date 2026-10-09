@@ -44,6 +44,7 @@ export const settingsTabs: SettingsSelectOption[] = [
 
 const settingsOptionLabels: Record<string, Record<string, string>> = {
   image_upscale_engine: {
+    final2x: 'Final2x / RealESRGAN',
     sharp_lanczos3: 'Sharp / Lanczos3',
     pillow_lanczos: 'Pillow / Lanczos',
   },

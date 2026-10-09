@@ -36,6 +36,13 @@ docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d
 `POSTGRES_PASSWORD` 会同时用于初始化数据库和构造 `DATABASE_URL`，因此请仅使用 URL 安全字符（字母、数字、下划线或连字符），不要在两个位置分别编码密码。
 启用该模式后，后续启动、升级、查看状态和停止服务都应同时指定这两个 Compose 文件。
 
+启用请求中的 `upscale=true` 后，应用默认使用 Final2x-core 的
+`realesr-general-x4v3` 通用轻量模型，再用高质量缩放收敛到请求的 2K/4K 长边；Docker 镜像会安装 Final2x 与 OpenCV 所需的 `libomp5`、`libgl1` 和
+`libglib2.0-0`，并以 CPU 模式运行。可通过
+`CHATGPT2API_FINAL2X_MODEL`、`CHATGPT2API_FINAL2X_DEVICE` 和
+`CHATGPT2API_FINAL2X_TIMEOUT_SECONDS` 调整模型、设备和单张图片超时。首次
+使用可能需要下载模型文件，生产环境应在低峰期预热并监控容器磁盘和内存。
+
 查看状态与日志：
 
 ```bash

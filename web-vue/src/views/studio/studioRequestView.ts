@@ -108,6 +108,8 @@ export async function createStudioImageTask(input: StudioImageTaskInput): Promis
       n,
       size,
       quality,
+      upscale: input.imageForm.upscaleTarget !== 'original',
+      upscaleTarget: input.imageForm.upscaleTarget === 'original' ? undefined : input.imageForm.upscaleTarget,
     })
     : imageTasksApi.createGeneration({
       prompt: input.prompt,
@@ -115,6 +117,8 @@ export async function createStudioImageTask(input: StudioImageTaskInput): Promis
       n,
       size,
       quality,
+      upscale: input.imageForm.upscaleTarget !== 'original',
+      upscaleTarget: input.imageForm.upscaleTarget === 'original' ? undefined : input.imageForm.upscaleTarget,
     })
 }
 

@@ -297,6 +297,8 @@ IMAGE_TRACE_REQUEST_KEYS = {
     "response_format",
     "stream",
     "partial_images",
+    "upscale",
+    "upscale_target",
 }
 
 

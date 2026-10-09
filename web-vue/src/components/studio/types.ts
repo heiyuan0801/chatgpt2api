@@ -85,6 +85,7 @@ export interface StudioImageForm {
   size: string
   quality: string
   n: number
+  upscaleTarget: 'original' | '2k' | '4k'
 }
 
 export interface StudioPreviewImage {

@@ -250,7 +250,7 @@ _FIELD_SPECS: dict[str, dict[str, Any]] = {
     "account_processing_concurrency": _numeric_field_metadata("account_processing_concurrency"),
     "image_account_retry_enabled": _field_metadata(True),
     "image_upscale_enabled": _field_metadata(False),
-    "image_upscale_engine": _field_metadata("sharp_lanczos3", options=("sharp_lanczos3", "pillow_lanczos")),
+    "image_upscale_engine": _field_metadata("final2x", options=("final2x", "sharp_lanczos3", "pillow_lanczos")),
     "image_max_account_attempts": _numeric_field_metadata("image_max_account_attempts"),
     "image_remove_conversation_after_result": _field_metadata(False),
     "image_settle_enabled": _field_metadata(True),
@@ -528,8 +528,8 @@ class SettingsManagementService:
             image_upscale_enabled=_bool(effective.get("image_upscale_enabled"), False),
             image_upscale_engine=_enum(
                 effective.get("image_upscale_engine"),
-                "sharp_lanczos3",
-                {"sharp_lanczos3", "pillow_lanczos"},
+                "final2x",
+                {"final2x", "sharp_lanczos3", "pillow_lanczos"},
             ),
             image_max_account_attempts=normalize_integer_setting(
                 "image_max_account_attempts",

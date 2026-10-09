@@ -213,6 +213,23 @@
                     </div>
                     <p class="studio-size-current">{{ selectedSizeDetailLabel }}</p>
                   </div>
+                  <div class="studio-size-section">
+                    <div class="studio-size-label">输出增强</div>
+                    <div class="studio-choice-grid is-resolution">
+                      <Button
+                        v-for="option in upscaleOptions"
+                        :key="option.value"
+                        size="sm"
+                        :variant="imageForm.upscaleTarget === option.value ? 'primary' : 'outline'"
+                        block
+                        root-class="studio-choice-button"
+                        @click="selectUpscaleTarget(option.value)"
+                      >
+                        {{ option.label }}
+                      </Button>
+                    </div>
+                    <p class="studio-size-current">{{ upscaleDetailLabel }}</p>
+                  </div>
                 </div>
               </div>
             </template>
@@ -323,6 +340,7 @@ const emit = defineEmits<{
   'update:imageSize': [size: string]
   'update:imageQuality': [quality: string]
   'update:imageCount': [count: number]
+  'update:imageUpscale': [target: 'original' | '2k' | '4k']
   submit: []
   stop: []
   'cancel-edit': []
@@ -417,6 +435,14 @@ const imageModelSelectOptions = computed(() => props.imageModelOptions.map((mode
 })))
 
 const sizePresets = computed(() => resolveImageSizePresets(props.imageHighResolutionEnabled))
+const upscaleOptions = [
+  { label: '原图', value: 'original' },
+  { label: '2K 高清', value: '2k' },
+  { label: '4K 高清', value: '4k' },
+] as const
+const upscaleDetailLabel = computed(() => props.imageForm.upscaleTarget === 'original'
+  ? '保留生成尺寸'
+  : `AI 超分，保持原图比例，最长边 ${props.imageForm.upscaleTarget === '4k' ? 3840 : 2048} 像素`)
 const selectedPreset = computed(() => sizePresets.value.find((preset) => preset.value === props.imageForm.size))
 const selectedRatio = computed(() => selectedPreset.value?.ratio || 'auto')
 const selectedResolution = computed(() => selectedPreset.value?.resolution || 'auto')
@@ -476,7 +502,8 @@ const chatSettingsMenuItems = computed<ComposerMenuItem[]>(() => [
 ])
 const imageSummaryLabel = computed(() => {
   const count = props.imageForm.n > 1 ? ` · ${props.imageForm.n} 张` : ''
-  return `${formatImageSizeLabel(props.imageForm.size)}${count}`
+  const upscale = props.imageForm.upscaleTarget === 'original' ? '' : ` · ${props.imageForm.upscaleTarget.toUpperCase()} 高清`
+  return `${formatImageSizeLabel(props.imageForm.size)}${upscale}${count}`
 })
 const imagePlaceholder = computed(() => props.references.length ? '描述你想如何修改参考图' : '输入你想生成的画面，也可以粘贴或拖入参考图')
 const chatPlaceholder = computed(() => props.references.length ? '描述你想让模型识别或分析的图片' : '输入消息，Enter 发送，Shift+Enter 换行')
@@ -602,6 +629,10 @@ function selectResolution(resolution: ImageSizeResolution) {
     : undefined
   const next = exact || sizePresets.value.find((preset) => preset.resolution === resolution) || auto
   emit('update:imageSize', next?.value || DEFAULT_IMAGE_SIZE)
+}
+
+function selectUpscaleTarget(target: 'original' | '2k' | '4k') {
+  emit('update:imageUpscale', target)
 }
 
 function handleFileChange(event: Event) {

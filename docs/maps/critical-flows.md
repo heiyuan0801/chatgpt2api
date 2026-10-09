@@ -60,7 +60,11 @@ sequenceDiagram
     Route->>Task: Create task
     Task->>Store: Persist queued/running projection
     Task->>Upstream: Execute attempts and account switches
-    Upstream->>Assets: Publish successful Image Assets
+    Upstream->>Assets: Save original Image Asset
+    opt Requested 2K or 4K delivery
+        Upstream->>Upstream: Final2x AI upscale and aspect-ratio convergence
+        Upstream->>Assets: Save transformed Image Asset
+    end
     Task->>Store: Persist terminal result
     Studio->>API: Poll owner-scoped task list
     API-->>Studio: Final task projection and asset URLs
@@ -69,7 +73,9 @@ sequenceDiagram
 `ImageTaskService` owns task admission, transitions, attempts, resumption, and
 terminal state. `ImageStorageService` exclusively owns Image Asset catalogue and
 storage mutations. Studio owns browser conversation presentation and polling,
-not task truth.
+not task truth. The upscale service owns model invocation, target sizing,
+timeout, output validation, and temporary-file cleanup; the task returns the
+transformed asset URL while retaining the original asset.
 
 ## Call Record, live monitor, and metrics
 

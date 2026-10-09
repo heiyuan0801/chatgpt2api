@@ -39,7 +39,7 @@ from services.image_failure import (
     terminal_assistant_text,
 )
 from services.image_storage_service import image_storage_service
-from services.image_upscale_service import upscale_image_if_needed
+from services.image_upscale_service import ImageUpscaleError, upscale_image
 from services.openai_backend_api import OpenAIBackendAPI
 from services.proxy_service import ImageEgressDeadlineError, proxy_settings
 from services.realtime_monitor_service import realtime_monitor_service
@@ -489,21 +489,44 @@ def format_image_result(
     created: int | None = None,
     message: str = "",
     requested_size: str | None = None,
+    upscale: bool = False,
+    upscale_target: object = None,
+    progress_callback: Any = None,
     deadline_monotonic: float | None = None,
 ) -> dict[str, Any]:
     data: list[dict[str, Any]] = []
     image_urls: list[str] = []
+    # AI upscaling is a local delivery stage.  It can outlive the upstream
+    # generation deadline on a CPU-only host, but the completed source and
+    # transformed assets must still be stored for the asynchronous Image Task.
+    storage_deadline = None if upscale else deadline_monotonic
     for item in items:
         b64_json = str(item.get("b64_json") or "").strip()
         if not b64_json:
             continue
         revised_prompt = str(item.get("revised_prompt") or prompt).strip() or prompt
-        image_bytes = base64.b64decode(b64_json)
-        image_bytes = upscale_image_if_needed(image_bytes, requested_size)
+        original_bytes = base64.b64decode(b64_json)
+        if upscale and progress_callback:
+            progress_callback("image_upscale")
+        upscale_result = upscale_image(
+            original_bytes,
+            requested_size,
+            enabled=upscale,
+            target=upscale_target,
+        )
+        image_bytes = upscale_result.data
+        if upscale and progress_callback:
+            progress_callback("image_upscale_done")
+        if image_bytes != original_bytes:
+            save_image_bytes(
+                original_bytes,
+                base_url,
+                deadline_monotonic=storage_deadline,
+            )
         stored_url = save_image_bytes(
             image_bytes,
             base_url,
-            deadline_monotonic=deadline_monotonic,
+            deadline_monotonic=storage_deadline,
         )
         if stored_url:
             image_urls.append(stored_url)
@@ -534,6 +557,8 @@ class ConversationRequest:
     n: int = 1
     size: str | None = None
     quality: str = "auto"
+    upscale: bool = False
+    upscale_target: str | None = None
     response_format: str = "b64_json"
     base_url: str | None = None
     message_as_error: bool = False
@@ -1622,6 +1647,9 @@ def _image_result_output_from_urls(
         request.base_url,
         int(time.time()),
         requested_size=request.size,
+        upscale=request.upscale,
+        upscale_target=request.upscale_target,
+        progress_callback=request.progress_callback,
         deadline_monotonic=request.deadline_monotonic or None,
     )
     data = formatted["data"]
@@ -2009,6 +2037,9 @@ def stream_codex_image_outputs(
         request.base_url,
         int(time.time()),
         requested_size=request.size,
+        upscale=request.upscale,
+        upscale_target=request.upscale_target,
+        progress_callback=request.progress_callback,
         deadline_monotonic=request.deadline_monotonic or None,
     )
     data = formatted["data"]
@@ -2071,6 +2102,7 @@ def _generate_single_image(
         nonlocal retry_token, fallback_retry_pending, retry_error, pending_switch_attempt_index
         if (
             failure.code == "task_interrupted"
+            or failure.code == "image_upscale_failed"
             or (
                 request.deadline_monotonic > 0
                 and time.monotonic() >= request.deadline_monotonic

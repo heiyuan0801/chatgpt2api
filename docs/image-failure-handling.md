@@ -22,7 +22,11 @@ HTTP 400 的图片结果被分类为文本结果：`content_policy_violation`、
 | `image_stream_timeout` / `image_stream_interrupted` | SSE 超时或中断 | 502 |
 | `image_tool_error` | 上游图片工具终态异常 | 502 |
 | `image_download_failed` | 已生成但交付下载失败 | 502 |
+| `image_upscale_failed` | 原图已生成但 Final2x 交付处理失败 | 502 |
 | `no_available_account` | 当前账号池无法选择账号 | 503 |
+
+`image_upscale_failed` 属于本地交付失败，保留原图存储结果并直接结束当前
+任务；它不会触发上游账号切换或重新生成。
 
 ## 诊断字段
 

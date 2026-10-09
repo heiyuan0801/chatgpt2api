@@ -15,6 +15,9 @@ dependencies = [
     "uvicorn>=0.44.0",
     "sqlalchemy>=2.0.0",
     "psycopg2-binary>=2.9.0",
+    "Final2x-core>=4.1.0,<5",
+    "torch>=2.0",
+    "torchvision>=0.20",
 ]
 
 [dependency-groups]
@@ -26,3 +29,16 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", marker = "sys_platform == 'linux'" },
+]
+torchvision = [
+    { index = "pytorch-cpu", marker = "sys_platform == 'linux'" },
+]

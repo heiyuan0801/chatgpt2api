@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 from fastapi import APIRouter, Header, HTTPException, Query, Request
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
@@ -19,6 +21,8 @@ class ImageGenerationTaskRequest(BaseModel):
     n: int = Field(default=1, ge=1, le=4)
     size: str | None = None
     quality: str = "auto"
+    upscale: bool = False
+    upscale_target: Literal["2k", "4k"] | None = None
 
 
 class ResumePollRequest(BaseModel):
@@ -73,6 +77,11 @@ def create_router() -> APIRouter:
                 n=body.n,
                 size=body.size,
                 quality=body.quality,
+                upscale=body.upscale or bool(body.upscale_target) or str(body.size or "").strip().lower() in {"2k", "4k"},
+                upscale_target=(
+                    body.upscale_target
+                    or (str(body.size).strip().lower() if str(body.size or "").strip().lower() in {"2k", "4k"} else None)
+                ),
                 base_url=resolve_image_base_url(request),
             )
         except ImageTaskQueueFullError as exc:
@@ -107,6 +116,15 @@ def create_router() -> APIRouter:
                 n=payload.get("n", 1),
                 size=payload["size"],
                 quality=payload["quality"],
+                upscale=str(payload.get("upscale") or "").strip().lower() in {"1", "true", "yes", "on"}
+                or bool(payload.get("upscale_target"))
+                or str(payload.get("size") or "").strip().lower() in {"2k", "4k"},
+                upscale_target=payload.get("upscale_target")
+                or (
+                    str(payload.get("size")).strip().lower()
+                    if str(payload.get("size") or "").strip().lower() in {"2k", "4k"}
+                    else None
+                ),
                 base_url=resolve_image_base_url(request),
                 images=images,
                 masks=masks,
